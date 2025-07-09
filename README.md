@@ -1,68 +1,92 @@
 # Data Warehouse & Analytical Project
 This project demonstrates a comprehensive data warehousing and analytics solution, from building a data warehouse to generating actionable insights. Designed as a portfolio project, it highlights industry best practices in data engineering and analytics.
 
-🏗️ Data Architecture
+# 🏗️ Data Warehouse and Analytics Project
 
-The data architecture for this project follows Medallion Architecture Bronze, Silver, and Gold layers:
-Project Overview
-Bronze Layer: Stores raw data as-is from the source systems. Data is ingested from CSV Files into SQL Server Database.
-Silver Layer: This layer includes data cleansing, standardization, and normalization processes to prepare data for analysis.
-Gold Layer: Houses business-ready data modeled into a star schema required for reporting and analytics.
+This project demonstrates a **comprehensive data warehousing and analytics solution**, from building a data warehouse to generating actionable insights. Designed as a **portfolio project**, it follows **industry best practices** in data engineering and analytics.
 
-This project involves:
+---
 
-Data Architecture: Designing a Modern Data Warehouse Using Medallion Architecture Bronze, Silver, and Gold layers.
-ETL Pipelines: Extracting, transforming, and loading data from source systems into the warehouse.
-Data Modeling: Developing fact and dimension tables optimized for analytical queries.
-Analytics & Reporting: Creating SQL-based reports and dashboards for actionable insights.
-🎯 This repository is an excellent resource for professionals and students looking to showcase expertise in:
+## 📐 Data Architecture
 
-SQL Development
-Data Architect
-Data Engineering
-ETL Pipeline Developer
-Data Modeling
-Data Analytics
-🛠️ Important Links & Tools:
+The project implements the **Medallion Architecture** using the **Bronze, Silver, and Gold** layers:
 
-Everything is for Free!
+- **🔸 Bronze Layer**  
+  Stores raw data as-is from the source systems. Data is ingested from **CSV files** into a **SQL Server database**.
 
-Datasets: Access to the project dataset (csv files).
-SQL Server Express: Lightweight server for hosting your SQL database.
-SQL Server Management Studio (SSMS): GUI for managing and interacting with databases.
-Git Repository: Set up a GitHub account and repository to manage, version, and collaborate on your code efficiently.
-DrawIO: Design data architecture, models, flows, and diagrams.
-Notion: Get the Project Template from Notion
-Notion Project Steps: Access to All Project Phases and Tasks.
-🚀 Project Requirements
+- **🔹 Silver Layer**  
+  Data cleansing, standardization, and normalization to prepare data for analysis.
 
-Building the Data Warehouse (Data Engineering)
+- **⭐ Gold Layer**  
+  Business-ready data modeled into a **star schema** for reporting and analytics.
 
-Objective
+---
 
-Develop a modern data warehouse using SQL Server to consolidate sales data, enabling analytical reporting and informed decision-making.
+## ⚙️ Project Components
 
-Specifications
+This project includes:
 
-Data Sources: Import data from two source systems (ERP and CRM) provided as CSV files.
-Data Quality: Cleanse and resolve data quality issues prior to analysis.
-Integration: Combine both sources into a single, user-friendly data model designed for analytical queries.
-Scope: Focus on the latest dataset only; historization of data is not required.
-Documentation: Provide clear documentation of the data model to support both business stakeholders and analytics teams.
-BI: Analytics & Reporting (Data Analysis)
+- **🧱 Data Architecture**  
+  Designing a modern data warehouse using the Medallion architecture.
 
-Objective
+- **🔄 ETL Pipelines**  
+  Extract, Transform, Load processes to populate the data warehouse.
 
-Develop SQL-based analytics to deliver detailed insights into:
+- **📊 Data Modeling**  
+  Creation of **fact** and **dimension** tables optimized for analytical queries.
 
-Customer Behavior
-Product Performance
-Sales Trends
-These insights empower stakeholders with key business metrics, enabling strategic decision-making.
+- **📈 Analytics & Reporting**  
+  SQL-based reports and dashboards delivering actionable insights.
 
-For more details, refer to docs/requirements.md.
 
-📂 Repository Structure
+## 🛠️ Tools & Resources
+
+Everything used in this project is **free**:
+
+| Tool / Resource           | Description                                                      |
+|---------------------------|------------------------------------------------------------------|
+| **Datasets**              | ERP & CRM data in CSV format                                     |
+| **SQL Server Express**    | Lightweight SQL server hosting the data warehouse                |
+| **SQL Server Management Studio (SSMS)** | GUI to manage and query SQL Server databases         |
+| **GitHub Repository**     | Version control and collaboration                                |
+| **Draw.io**               | Visual diagrams of architecture, ETL, data flow, and models      |
+| **Notion**                | Project template with all phases and tasks                       |
+
+---
+
+## 🚀 Project Requirements
+
+### 🔧 Data Engineering: Building the Data Warehouse
+
+**Objective**  
+Develop a modern data warehouse in SQL Server to consolidate sales data for analytical reporting.
+
+**Specifications**
+
+- **Data Sources**: Import from ERP and CRM systems via CSV files  
+- **Data Quality**: Cleanse and resolve issues prior to analysis  
+- **Integration**: Unified data model for analytical queries  
+- **Scope**: Focus on latest data (no historization)  
+- **Documentation**: Clear data model documentation for stakeholders
+
+---
+
+### 📊 Data Analysis: BI & Reporting
+
+**Objective**  
+Create SQL-based analytics to deliver insights into:
+
+- 🧍 Customer Behavior  
+- 📦 Product Performance  
+- 💰 Sales Trends  
+
+These insights provide stakeholders with key business metrics to support **strategic decision-making**.
+
+> 📄 For more details, refer to: `docs/requirements.md`
+
+---
+
+## 📁 Repository Structure
 
 data-warehouse-project/
 │
