@@ -1,7 +1,8 @@
------Gold Layer--------
---Join all customer information
+=============================GOLD LAYER===============================================
 
-SELECT 			c.cust_id,
+---------Join all customer information tables
+
+SELECT 			       c.cust_id,
 				c.cst_key,
 				c.cst_firstname,
 				c.cst_lastname,
@@ -16,9 +17,12 @@ ON c.cst_key = ec.cid
 LEFT JOIN silver.erp_loc_a101 el
 ON c.cst_key = el.cid
 
----Check cst_key is not duplicate after joining
-SELECT cst_key , COUNT(*) FROM (
-SELECT 			c.cust_id,
+---Quality Check on cst_key should not be duplicate
+
+SELECT cst_key , 
+COUNT(*) 
+FROM (
+                     SELECT 	c.cust_id,
 				c.cst_key,
 				c.cst_firstname,
 				c.cst_lastname,
@@ -33,29 +37,53 @@ ON c.cst_key = ec.cid
 LEFT JOIN silver.erp_loc_a101 el
 ON c.cst_key = el.cid)
 GROUP BY cst_key
-HAVING COUNT(*) > 1 -----No Duplicate
+HAVING COUNT(*) > 1 -----No Duplicate found
 
----Also there are 2 gender column ---Data Integration
+---Also there are 2 gender column after joining all 3 tables 
+===========================================================
+ Data Integration
+===========================================================
+--Please not CRM table is the master table so whatever information is present in that table is right as per Data Sources (This can get by asking Data source people , data enginer)
 
---Please not CRM table is the master table so whatever infor is present in that table is right as per Data Sources
 
-SELECT 		DISTINCT
-				c.cst_gndr,
-				ec.gen
+---Checking gender column for any missing information or incorrect information
+
+SELECT DISTINCT c.cst_gndr,
+ec.gen
 FROM silver.crm_cust_info c
 LEFT JOIN silver.erp_cust_az12 ec
 ON c.cst_key = ec.cid
 LEFT JOIN silver.erp_loc_a101 el
 ON c.cst_key = el.cid
 
-SELECT 		DISTINCT
-				c.cst_gndr,
-				ec.gen,
-				CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
-					WHEN ec.gen = 'FEMALE' THEN 'Female'
-					WHEN ec.gen = 'MALE' THEN 'Male'
-					ELSE COALESCE (ec.gen, 'n/a')
-				END AS new_gen
+output
+-----------
+cst_gendr gen
+"n/a"	"FEMALE"
+"n/a"	"MALE"
+"Female" "n/a"
+"Female" "FEMALE"
+"Male"	"FEMALE"
+"Female" "MALE"
+"n/a"	"n/a"
+"Male"	"MALE"
+"Male"	"n/a"
+
+----Lot of data is mimatching.
+To fix this
+1.keep the information of csr_gendr as it is apart from n/a where there is value in 'gen' table
+2.For 'n/a' information in cst_gendr , take the value from gen table if available apart from NULL value
+3.Change case of Female and Male for consistency 
+
+
+SELECT 		
+DISTINCT c.cst_gndr,
+ec.gen,
+CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
+     WHEN ec.gen = 'FEMALE' THEN 'Female'
+     WHEN ec.gen = 'MALE' THEN 'Male'
+     ELSE COALESCE (ec.gen, 'n/a')
+END AS new_gen
 FROM silver.crm_cust_info c
 LEFT JOIN silver.erp_cust_az12 ec
 ON c.cst_key = ec.cid
@@ -109,9 +137,13 @@ LEFT JOIN silver.erp_cust_az12 ec
 ON c.cst_key = ec.cid
 LEFT JOIN silver.erp_loc_a101 el
 ON c.cst_key = el.cid
---This is Diemension table and need to create a primary key since we dont have we will generate surrogate key
+
+---As table contain information of customer descriptive so it means it is a Dimension table
+--Need to create a primary key since we dont have we will generate surrogate key just to connect to Fact Table. 
+--Surrogate key have no business meanig but help to create data model
 
 DROP VIEW gold.dim_customers
+
 CREATE VIEW gold.dim_customers AS
 SELECT 			
 				ROW_NUMBER() OVER(ORDER BY cust_id ) AS customer_key,
@@ -141,8 +173,8 @@ SELECT DISTINCT gender FROM gold.dim_customers
 
 
 
-------------Product Table
----kEEPING only Current data , means end date shoul be null
+---------Join all Product information tables
+---As per Business Ask :Keep only Current data , means end date should be null
 
 
 SELECT
@@ -157,8 +189,8 @@ SELECT
 FROM silver.crm_prd_info p
 WHERE p.prd_end_dt IS NULL ---Filter out all historical data 
 
-
-
+---Since end date is null , REMOVE end_date from SELECT clause
+---Join 
 SELECT
 			p.prd_id,
 			p.prd_key,
@@ -176,7 +208,7 @@ ON p.cat_id = px.id
 WHERE p.prd_end_dt IS NULL
 
 
----Quality Chevk
+---Quality Check for prd_key duplication
 
 
 SELECT prd_key, COUNT(*) FROM (
@@ -196,10 +228,10 @@ LEFT JOIN silver.erp_px_cat_g1v2 px
 ON p.cat_id = px.id
 WHERE p.prd_end_dt IS NULL)
 GROUP BY prd_key
-HAVING COUNT(*) > 1
+HAVING COUNT(*) > 1---No Duplicate
 
 
---Sorting & Naming column
+------Sorting & Naming column
 SELECT
 	ROW_NUMBER() OVER(ORDER BY p.prd_start_dt,p.prd_key ) AS product_key,
 			p.prd_id AS product_id,
@@ -217,6 +249,7 @@ LEFT JOIN silver.erp_px_cat_g1v2 px
 ON p.cat_id = px.id
 WHERE p.prd_end_dt IS NULL  --- Dimension Table
 
+---Creation of VIEWS
 
 CREATE VIEW gold.dim_products AS
 SELECT
@@ -236,8 +269,8 @@ LEFT JOIN silver.erp_px_cat_g1v2 px
 ON p.cat_id = px.id
 WHERE p.prd_end_dt IS NULL 
 
-
- SELECT    sls_ord_num,
+----Sales_details table.It is only one table so no combining
+ SELECT            sls_ord_num,
 		    sls_prd_key,
 		    sls_cust_id,
 		    sls_order_dt,
@@ -247,13 +280,15 @@ WHERE p.prd_end_dt IS NULL
 		    sls_quantity,
 		    sls_price
 FROM silver.crm_sales_details sd
-LEFT JOIN gold.dim_products pr
-ON sd.sls_prd_key = pr.product_number
+
+The tables has ids,dates, measure (event or transaction) means it is a Fact table
+
+-----Combing with dimention table
 
 
  SELECT    sls_ord_num,
-			pr.product_key,
-			cd.customer_key,
+		pr.product_key, ---Replacing with sls_prd_key with surrogate_key
+		cd.customer_key, ---Replacing with sls_cust_id with surrogate_key
 		    sls_order_dt,
 		    sls_ship_dt,
 		    sls_due_dt,
@@ -266,24 +301,15 @@ ON sd.sls_prd_key = pr.product_number
 LEFT JOIN gold.dim_customers cd
 ON sd.sls_cust_id = cd.customer_id
 
+--No need to original product key and customer key, will use surrogate key for data Modeling
 
-SELECT    sls_ord_num,
-		    sls_prd_key,
-		    sls_cust_id,
-		    sls_order_dt,
-		    sls_ship_dt,
-		    sls_due_dt,
-		    sls_sales,
-		    sls_quantity,
-		    sls_price
-FROM silver.crm_sales_details sd
-LEFT JOIN gold.dim_products pr
-ON sd.sls_prd_key = pr.product_number
+
+-----Creation of VIEWS 
 
 CREATE VIEW gold.fact_sales AS
  SELECT    sls_ord_num AS order_number,
-			pr.product_key, ---Replaced
-			cd.customer_key, ---Replaced to connect fact with dimension
+		pr.product_key, ---Replaced
+		cd.customer_key, ---Replaced to connect fact with dimension
 		    sls_order_dt AS order_date,
 		    sls_ship_dt AS shipping_date,
 		    sls_due_dt AS due_date,
