@@ -237,3 +237,33 @@ ON p.cat_id = px.id
 WHERE p.prd_end_dt IS NULL 
 
 
+ SELECT    sls_ord_num,
+		    sls_prd_key,
+		    sls_cust_id,
+		    sls_order_dt,
+		    sls_ship_dt,
+		    sls_due_dt,
+		    sls_sales,
+		    sls_quantity,
+		    sls_price
+FROM silver.crm_sales_details sd
+LEFT JOIN gold.dim_products pr
+ON sd.sls_prd_key = pr.product_number
+
+
+ SELECT    sls_ord_num,
+			pr.product_key,
+			cd.customer_key,
+		    sls_order_dt,
+		    sls_ship_dt,
+		    sls_due_dt,
+		    sls_sales,
+		    sls_quantity,
+		    sls_price
+FROM silver.crm_sales_details sd
+LEFT JOIN gold.dim_products pr
+ON sd.sls_prd_key = pr.product_number
+LEFT JOIN gold.dim_customers cd
+ON sd.sls_cust_id = cd.customer_id
+
+
