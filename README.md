@@ -8,7 +8,7 @@ This project demonstrates a **comprehensive data warehousing and analytics solut
 
 The project implements the **Medallion Architecture** using the **Bronze, Silver, and Gold** layers:
 
-(docs/data_architecture.png)
+![data_architecture](docs/Data_Architecture.png)
 
 
 - **🔸 Bronze Layer**  
