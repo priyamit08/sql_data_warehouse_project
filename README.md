@@ -8,6 +8,9 @@ This project demonstrates a **comprehensive data warehousing and analytics solut
 
 The project implements the **Medallion Architecture** using the **Bronze, Silver, and Gold** layers:
 
+(docs/data_architecture.png)
+
+
 - **🔸 Bronze Layer**  
   Stores raw data as-is from the source systems. Data is ingested from **CSV files** into a **SQL Server database**.
 
