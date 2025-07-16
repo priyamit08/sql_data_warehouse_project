@@ -1,0 +1,136 @@
+-----Gold Layer--------
+--Join all customer information
+
+SELECT 			c.cust_id,
+				c.cst_key,
+				c.cst_firstname,
+				c.cst_lastname,
+				c.cst_marital_status,
+				c.cst_gndr,
+				c.cst_create_date,
+				ec.bdate,
+				ec.gen,el.cntry
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid
+
+---Check cst_key is not duplicate after joining
+SELECT cst_key , COUNT(*) FROM (
+SELECT 			c.cust_id,
+				c.cst_key,
+				c.cst_firstname,
+				c.cst_lastname,
+				c.cst_marital_status,
+				c.cst_gndr,
+				c.cst_create_date,
+				ec.bdate,
+				ec.gen,el.cntry
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid)
+GROUP BY cst_key
+HAVING COUNT(*) > 1 -----No Duplicate
+
+---Also there are 2 gender column ---Data Integration
+
+--Please not CRM table is the master table so whatever infor is present in that table is right as per Data Sources
+
+SELECT 		DISTINCT
+				c.cst_gndr,
+				ec.gen
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid
+
+SELECT 		DISTINCT
+				c.cst_gndr,
+				ec.gen,
+				CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
+					WHEN ec.gen = 'FEMALE' THEN 'Female'
+					WHEN ec.gen = 'MALE' THEN 'Male'
+					ELSE COALESCE (ec.gen, 'n/a')
+				END AS new_gen
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid;
+
+
+
+--Rename all the column with freindly name---
+
+SELECT 			c.cust_id AS customer_id,
+				c.cst_key AS customer_number,
+				c.cst_firstname AS first_name,
+				c.cst_lastname AS last_name,
+				c.cst_marital_status AS marital_status,
+				CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
+					WHEN ec.gen = 'FEMALE' THEN 'Female'
+					WHEN ec.gen = 'MALE' THEN 'Male'
+					ELSE COALESCE (ec.gen, 'n/a')
+				END AS gender,
+				c.cst_create_date AS create_date,
+				ec.bdate AS birthdate,
+				el.cntry AS country
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid
+
+
+---Sort the column in a logical order
+
+SELECT 			c.cust_id AS customer_id,
+				c.cst_key AS customer_number,
+				c.cst_firstname AS first_name,
+				c.cst_lastname AS last_name,
+				el.cntry AS country,
+				c.cst_marital_status AS marital_status,
+				CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
+					WHEN ec.gen = 'FEMALE' THEN 'Female'
+					WHEN ec.gen = 'MALE' THEN 'Male'
+					ELSE COALESCE (ec.gen, 'n/a')
+				END AS gender,
+				ec.bdate AS birthdate,
+				c.cst_create_date AS create_date
+				
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid
+--This is Diemension table and need to create a primary key since we dont have we will generate surrogate key
+DROP VIEW gold.dim_customers
+CREATE VIEW gold.dim_customers AS
+SELECT 			c.cust_id AS customer_id,
+				c.cst_key AS customer_number,
+				c.cst_firstname AS first_name,
+				c.cst_lastname AS last_name,
+				el.cntry AS country,
+				c.cst_marital_status AS marital_status,
+				CASE WHEN c.cst_gndr !='n/a' THEN c.cst_gndr
+					WHEN ec.gen = 'FEMALE' THEN 'Female'
+					WHEN ec.gen = 'MALE' THEN 'Male'
+					ELSE COALESCE (ec.gen, 'n/a')
+				END AS gender,
+				ec.bdate AS birthdate,
+				c.cst_create_date AS create_date
+				
+FROM silver.crm_cust_info c
+LEFT JOIN silver.erp_cust_az12 ec
+ON c.cst_key = ec.cid
+LEFT JOIN silver.erp_loc_a101 el
+ON c.cst_key = el.cid
+
+----Quality Check
+
+SELECT DISTINCT gender FROM gold.dim_customers
+
